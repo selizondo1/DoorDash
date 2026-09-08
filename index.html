@@ -20,7 +20,8 @@ body{font-family:var(--font);color:var(--ink);background:#111;font-size:13px;-we
 button{font-family:inherit;cursor:pointer}
 
 .wrap{height:100vh;display:flex;flex-direction:column;background:#111}
-.app{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--shell);overflow:hidden}
+/* relative so the scenario-complete card can pin itself to the console */
+.app{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;background:var(--shell);overflow:hidden}
 
 /* ---------- top ribbon ---------- */
 .ribbon{height:46px;flex:0 0 46px;background:#000;display:flex;align-items:center;padding:0 16px;gap:22px;color:#fff}
@@ -228,8 +229,16 @@ button{font-family:inherit;cursor:pointer}
 .composer{border-top:1px solid var(--line2);padding:10px 16px 12px}
 .quick{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}
 .qb{position:relative;border:1px solid var(--line);background:#fff;border-radius:16px;padding:5px 13px;font-size:11.5px;color:var(--ink2)}
-.qb.hot{background:#111;color:#fff;border-color:#111}
-.qb.press{background:#000;color:#fff;border-color:#000;transform:translateY(1px)}
+/* Resolve is the one quick reply the agent actually clicks, and it stays green
+   the whole way through — the fill just deepens a shade on hover and again on
+   press, so the click still registers without the pill flipping to black. */
+.qb.hot{background:#d7f0e1;border-color:#2f9e63;color:var(--ink)}
+.qb.press{background:#c2e6d1;border-color:#268052;color:var(--ink);transform:translateY(1px)}
+/* While the guide is pointing at it the pill reads the same way the status pill
+   does: green fill, red border, inside the pulsing ring. */
+.qb.spot{background:#e4f4ea;border-color:#eb1700;color:var(--ink)}
+.qb.spot.hot{background:#d7f0e1}
+.qb.spot.press{background:#c2e6d1;transform:translateY(1px)}
 .inputBox{border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:62px;display:flex;flex-direction:column;justify-content:space-between}
 .inputBox .ph{font-size:12.5px;color:var(--ink4)}
 .inputBox.focus{border-color:#9fb3bb;box-shadow:0 0 0 3px rgba(17,138,78,.10)}
@@ -648,7 +657,7 @@ button{font-family:inherit;cursor:pointer}
 /* The Order Tool sheet that slides in from the right edge of the console.
    Its top is pulled up past the body so the sheet rides over the black
    ribbon and covers the ? and the DW avatar sitting up there. */
-.otPanel{position:absolute;top:-38px;right:9px;bottom:9px;width:352px;background:#fff;z-index:60;
+.otPanel{position:absolute;top:-38px;right:2px;bottom:9px;width:352px;background:#fff;z-index:60;
   border:1px solid var(--line);border-radius:14px;overflow:hidden;
   box-shadow:-14px 0 40px rgba(0,0,0,.18);
   display:flex;flex-direction:column}
@@ -776,6 +785,29 @@ button{font-family:inherit;cursor:pointer}
 /* ============================================================
    COVER — the scenario selector that fronts the simulator
    ============================================================ */
+/* ---- scenario-complete card -------------------------------------------
+   The simulator's sign-off, not part of the DoorDash console: it dims the
+   whole workspace and sits centred over it. Same z-band as the cover but a
+   notch under it, so rewinding to the scenario list still wins. Hidden by
+   default; render() turns it on when the last case has gone Solved. */
+.doneWrap{position:absolute;inset:0;z-index:280;display:none;
+  align-items:center;justify-content:center;background:rgba(15,17,17,.42)}
+.doneWrap.on{display:flex}
+.doneCard{width:430px;max-width:82%;background:#fff;border-radius:16px;
+  padding:34px 40px 28px;text-align:center;
+  box-shadow:0 24px 60px rgba(0,0,0,.28)}
+.doneTick{width:74px;height:74px;margin:0 auto 22px;border-radius:50%;
+  background:#dcf5e6;display:flex;align-items:center;justify-content:center}
+.doneCard h2{margin:0 0 12px;font-size:26px;line-height:1.2;letter-spacing:-.3px;
+  font-weight:700;color:#0f1111}
+.doneCard p{margin:0 0 10px;font-size:14px;line-height:1.55;color:#4b5457}
+.doneCard p b{color:#0f1111;font-weight:600}
+.doneKicker{margin:0 0 24px !important;font-weight:600;color:#0f1111 !important}
+.doneBtn{display:block;width:100%;padding:12px 16px;border-radius:9px;
+  font-size:14.5px;font-weight:600;cursor:default}
+.doneBtn.pri{background:#eb1700;border:1px solid #eb1700;color:#fff;margin-bottom:10px}
+.doneBtn.sec{background:#fff;border:1px solid var(--line);color:#0f1111}
+
 /* sits over the app but stops short of the transport bar, which stays usable */
 .cover{position:fixed;left:0;right:0;top:0;bottom:60px;z-index:300;background:#f5f6f7;
   overflow-y:auto;color:#0f1111;font-size:14px;line-height:1.5}
@@ -1041,6 +1073,23 @@ button{font-family:inherit;cursor:pointer}
     </div>
 
     <div class="note" id="note" style="display:none"><span></span></div>
+
+    <!-- the simulator's own end card, thrown over the console once the last
+         case goes Solved. It is the trainer talking, not the DoorDash tool. -->
+    <div class="doneWrap" id="doneWrap">
+      <div class="doneCard">
+        <div class="doneTick">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0f8a4d"
+               stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4.5 12.6l4.8 4.8L19.6 7"/></svg>
+        </div>
+        <h2>Scenario Completed!</h2>
+        <p>You successfully completed <b>Dual-Chat: Unmarked Delivery &amp; Earnings Inquiry</b></p>
+        <p class="doneKicker">Great job! Your performance feedback is ready</p>
+        <button class="doneBtn pri">View Feedback</button>
+        <button class="doneBtn sec">Back to Scenarios</button>
+      </div>
+    </div>
   </div>
 
   <div class="transport">
@@ -1320,7 +1369,8 @@ function freshState(){
     stPress: false,           // the pill is being clicked
     stMenu: false,            // the Change status menu is showing
     stMenuHot: null,          // the option under the cursor
-    stMenuPress: null         // the option being clicked
+    stMenuPress: null,        // the option being clicked
+    done: false               // the scenario-complete card is up
   };
 }
 
@@ -1949,25 +1999,28 @@ at(259.2,"Renata's chat is resolved and tagged",st=>{
   const c=chat(st,C2); c.resolved=true; c.tag="dasher_pay Low - DX";
   st.railBadge=0;
 });
-/* --- and then the case status itself is set to Solved --- */
-at(260.0,"Agent moves onto the status pill",st=>{ st.stHot = true; });
-at(260.7,"Clicks Open",st=>{ st.stHot=false; st.stPress = true; });
-at(261.3,"The Change status menu drops down",st=>{
+/* --- the workflow gets closed out first; the case status is the last thing
+       the agent touches, so the scenario ends on Solved --- */
+at(260.0,"Back to the workflow, agent moves onto Done",st=>{ st.wf.hover = true; });
+at(260.7,"Clicks Done",st=>{ st.wf.hover=null; st.wf.pick = true; });
+at(261.5,"The workflow closes",st=>{ st.wf = null; });
+
+at(262.3,"Agent moves onto the status pill",st=>{ st.stHot = true; });
+at(263.0,"Clicks Open",st=>{ st.stHot=false; st.stPress = true; });
+at(263.6,"The Change status menu drops down",st=>{
   st.stPress=false; st.stMenu = true;
 });
-at(262.3,"Agent moves onto Solved",st=>{ st.stMenuHot = "Solved"; });
-at(263.1,"Clicks Solved",st=>{ st.stMenuHot=null; st.stMenuPress = "Solved"; });
-at(263.8,"Status is Solved and the chat leaves the queue",st=>{
+at(264.6,"Agent moves onto Solved",st=>{ st.stMenuHot = "Solved"; });
+at(265.4,"Clicks Solved",st=>{ st.stMenuHot=null; st.stMenuPress = "Solved"; });
+at(266.1,"Status is Solved and the chat leaves the queue",st=>{
   st.stMenuPress=null; st.stMenu=false;
   const c=chat(st,C2); c.status="Solved"; c.gone=true;
 });
-
-at(264.8,"Back to the workflow, agent moves onto Done",st=>{ st.wf.hover = true; });
-at(265.5,"Clicks Done",st=>{ st.wf.hover=null; st.wf.pick = true; });
-at(266.3,"The workflow closes",st=>{ st.wf = null; });
-at(267.1,"Both contacts resolved",st=>{
+at(267.0,"Both contacts resolved",st=>{
   st.note = "Two contacts handled in the time one of them used to take.";
 });
+/* the simulator notices the last case went Solved and closes the scenario out */
+at(268.2,"The simulator marks the scenario complete",st=>{ st.done = true; });
 
 /* ============================================================
    COVER
@@ -1981,7 +2034,8 @@ const CV_SCR1    = 3.2;   // Level 2 — Multitasking has settled into view
 const COVER_HOT  = 3.4;   // cursor reaches the Start Simulation button
 const COVER_TAP  = 4.7;   // the click
 
-const DEMO_LEN = 268.3;
+/* the last 8s are the scenario-complete card sitting on screen to be read */
+const DEMO_LEN = 276.5;
 const DURATION = +(COVER + DEMO_LEN).toFixed(1);
 
 /* Paints the cover for a given clip time. Off-screen once the click lands. */
@@ -2247,44 +2301,35 @@ const GUIDE = {
     { t:113.6, x:"Open the Consumer tab, then the phone icon to call the customer",
                sel:"#ctxBody .cpCard.cons .cpTop .act:nth-child(5), #ctxBody .otTabs .t:nth-child(2)",
                spotUntil:121.5 },
-    /* the workflow asks the agent to tell the Dasher first — that message goes
-       out at 162.2, and only then does the manual mark-delivered walk begin.
-       No ring here: the chat box is where the agent already is, so pointing at
-       it would only add noise. */
-    { t:159.4, x:"Tell the Dasher you're marking the order as delivered, then Continue." },
     /* the ring comes off at 167.8, the moment the ⋮ is pressed and the menu is
        up — from there the agent is walking the menu, not looking for the button */
     { t:164.8, x:"Back on the Order tab: ⋮ menu → Change order status → Mark as Delivered.",
                sel:"#ctxBody .act.kb", spotUntil:167.8 },
-    { t:200.4, x:"Click Resolve so the chat is tagged.",
-               sel:"#quick .qb:nth-child(4)" },
+    /* the step lands a beat before the cursor does, so the pill has time to sit
+       there lit green inside the ring rather than going black on the same frame */
+    { t:199.0, x:"Click Resolve so the chat is tagged.",
+               sel:"#quick .qb:nth-child(4)", spotUntil:201.2 },
     { t:202.7, x:"Open the status pill and set the case to Solved.",
                sel:"#stWrap" }
   ],
   [C2]: [
-    { t:124.6, x:"Chat one is ringing. Open the waiting chat from the queue.",
-               sel:'#rows .row[data-cid="c2"]' },
-    { t:126.6, x:"Scroll up through the bot transcript to see what she already asked.",
+    /* the hand-off cue above the list already says to pick this chat up, so the
+       guide starts with the first thing the agent actually does here */
+    { t:126.6, x:"Scroll up through the bot transcript before you take the chat over.",
                sel:"#convoStage .msgs" },
-    { t:132.2, x:"Join the conversation and buy yourself time to check the policy.",
-               sel:"#inputBox" },
     { t:138.0, x:"Launch the Workflow Tool from the floating ◈ button in the corner of the pane.",
                sel:"#ctxTools .b.on", spotUntil:WF2_OPEN },
-    { t:143.4, x:"Work the drill-down while chat one is still ringing.",
-               sel:"#wfHost .wf" },
-    { t:149.6, x:"Call connects — park this workflow and switch back to chat one.",
-               sel:'#rows .row[data-cid="c1"]' },
-    { t:208.2, x:"Come back here; the workflow reopens where you left it.",
-               sel:'#rows .row[data-cid="c2"]' },
-    { t:218.3, x:"Put the workflow's tip guidance in your own words and send it.",
-               sel:"#inputBox" },
-    { t:257.8, x:"Click Resolve so the chat is tagged.",
-               sel:"#quick .qb:nth-child(4)" },
-    { t:260.0, x:"Open the status pill and set the case to Solved.",
-               sel:"#stWrap .openPill, #stWrap" },
-    { t:264.8, x:"Return to the workflow and click Done to close it.",
-               sel:"#wfHost .wf" },
-    { t:266.3, x:"Both contacts resolved — scenario complete." }
+    /* The ring on the workflow pane only earns its keep while the call on the
+       other chat is live — that is the moment the agent is juggling two things
+       and needs pointing at. Once she comes back to this chat on its own at
+       208.2 she is handling one contact at a time, so the ring stays off. */
+    { t:143.4, x:"Continue the workflow from where you left off.",
+               sel:"#wfHost .wf", spotUntil:145.0 },
+    { t:256.8, x:"Click Resolve so the chat is tagged.",
+               sel:"#quick .qb:nth-child(4)", spotUntil:258.5 },
+    /* lands as the workflow closes, a beat before the cursor reaches the pill */
+    { t:261.5, x:"Open the status pill and set the case to Solved.",
+               sel:"#stWrap .openPill, #stWrap" }
   ]
 };
 
@@ -2503,6 +2548,10 @@ function render(T){
   /* note — the commentary banner is switched off; the demo speaks for itself.
      st.note is still set throughout the script, so flipping this back on is a one-liner. */
   el("note").style.display = "none";
+
+  /* the simulator's end card — up only once the last case has gone Solved,
+     and never while the scenario selector is still on screen */
+  el("doneWrap").classList.toggle("on", !!st.done && T >= COVER);
 
   el("label").textContent = T < COVER
     ? "Scenario selector — Level 2 selected"
