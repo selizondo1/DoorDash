@@ -805,8 +805,64 @@ button{font-family:inherit;cursor:pointer}
 .doneKicker{margin:0 0 24px !important;font-weight:600;color:#0f1111 !important}
 .doneBtn{display:block;width:100%;padding:12px 16px;border-radius:9px;
   font-size:14.5px;font-weight:600;cursor:default}
-.doneBtn.pri{background:#eb1700;border:1px solid #eb1700;color:#fff;margin-bottom:10px}
+.doneBtn.pri{position:relative;background:#eb1700;border:1px solid #eb1700;color:#fff;margin-bottom:10px}
+.doneBtn.pri.hot{box-shadow:0 0 0 5px rgba(235,23,0,.16)}
+.doneBtn.pri.press{background:#c2140a;border-color:#c2140a;transform:translateY(1px)}
 .doneBtn.sec{background:#fff;border:1px solid var(--line);color:#0f1111}
+.doneBtn.pri .tapCur{left:58%;top:25px}
+
+/* ---- feedback / scoring screen ----------------------------------------
+   Not a dialog: it takes the whole console over, because there is more here
+   than fits in a card. Scrolls if the window is short. */
+.fbWrap{position:absolute;inset:0;z-index:290;display:none;overflow-y:auto;
+  background:#fff;padding:34px 0 40px}
+.fbWrap.on{display:block}
+.fbSheet{max-width:660px;margin:0 auto;padding:0 34px;color:#0f1111}
+.fbHead{margin:0 0 22px;font-size:25px;line-height:1.3;letter-spacing:-.3px;font-weight:500}
+.fbHead b{font-weight:800}
+
+/* the five bands, with the one earned filled in DoorDash red */
+.fbScale{display:flex;align-items:center;gap:4px;background:#f4f6f6;border-radius:999px;
+  padding:5px;margin-bottom:22px}
+.fbBand{flex:1;text-align:center;padding:9px 4px;border-radius:999px;font-size:13.5px;
+  font-weight:600;color:#eb1700;white-space:nowrap}
+.fbBand.on{background:#eb1700;color:#fff}
+
+.fbLead{margin:0 0 18px;font-size:14.5px;line-height:1.62;color:#4b5457}
+
+.fbImp{border-left:3px solid #eb1700;background:#fff6f4;border-radius:0 10px 10px 0;
+  padding:14px 18px;margin-bottom:26px}
+.fbImp h3{margin:0 0 6px;font-size:13px;font-weight:700;letter-spacing:.4px;
+  text-transform:uppercase;color:#eb1700}
+.fbImp p{margin:0;font-size:14px;line-height:1.6;color:#3f4547}
+
+.fbSub{margin:0 0 12px;font-size:16.5px;font-weight:700}
+.fbTable{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:26px}
+.fbRow{display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid var(--line2)}
+.fbRow:last-child{border-bottom:0}
+.fbSkill{flex:1;font-size:14px;font-weight:600}
+.fbStars{letter-spacing:2px;font-size:16px;line-height:1}
+/* earned stars read as gold, the way a rating is expected to look — the red
+   is doing enough work elsewhere on this screen */
+.fbStars b{color:#f5b323;font-weight:400}
+.fbStars i{color:#dfe3e4;font-style:normal}
+/* half star: a grey star with a gold copy of itself clipped down the middle */
+.fbStars u{position:relative;display:inline-block;color:#dfe3e4;text-decoration:none}
+.fbStars u::before{content:"★";position:absolute;left:0;top:0;width:50%;
+  overflow:hidden;color:#f5b323}
+.fbNum{width:26px;text-align:right;font-size:13.5px;font-weight:700;color:#767c7f}
+
+.fbBtns{display:flex;gap:12px}
+.fbBtn{display:inline-flex;align-items:center;gap:9px;padding:12px 22px;border-radius:9px;
+  font-size:14.5px;font-weight:600;cursor:pointer}
+.fbBtn.pri{background:#eb1700;border:1px solid #eb1700;color:#fff}
+.fbBtn.pri:hover{background:#c2140a;border-color:#c2140a}
+.fbBtn.sec{background:#fff;border:1px solid var(--line);color:#0f1111}
+.fbBtn.sec:hover{background:#f7f8f8}
+/* locked: the next scenario is not open yet, so the button reads as unavailable
+   and does not respond to the pointer at all */
+.fbBtn.off,.fbBtn.sec.off:hover{background:#f4f6f6;border-color:#e4e8e8;color:#a9b0b2;
+  cursor:not-allowed;pointer-events:none}
 
 /* sits over the app but stops short of the transport bar, which stays usable */
 .cover{position:fixed;left:0;right:0;top:0;bottom:60px;z-index:300;background:#f5f6f7;
@@ -1086,8 +1142,75 @@ button{font-family:inherit;cursor:pointer}
         <h2>Scenario Completed!</h2>
         <p>You successfully completed <b>Dual-Chat: Delivery issue &amp; Earnings inquiry</b></p>
         <p class="doneKicker">Great job! Your performance feedback is ready</p>
-        <button class="doneBtn pri">View Feedback</button>
-        <button class="doneBtn sec">Back to Scenarios</button>
+        <button class="doneBtn pri" id="fbBtn">View Feedback<span id="fbCur"></span></button>
+        <button class="doneBtn sec" id="backBtn">Back to Scenarios</button>
+      </div>
+    </div>
+
+    <!-- the scoring screen behind View Feedback. Same surface as the end card,
+         but a full sheet rather than a dialog — there is a lot to read. -->
+    <div class="fbWrap" id="fbWrap">
+      <div class="fbSheet">
+        <h2 class="fbHead">Your score was <b>Good</b>, keep building your skills 💪</h2>
+
+        <div class="fbScale">
+          <span class="fbBand">Poor</span>
+          <span class="fbBand">Fair</span>
+          <span class="fbBand on">Good</span>
+          <span class="fbBand">Very good</span>
+          <span class="fbBand">Excellent</span>
+        </div>
+
+        <p class="fbLead">You successfully managed both chats, demonstrating strong
+          prioritization and resolution speed. You accurately resolved the Dasher issues
+          and maintained good control of the interaction.</p>
+
+        <div class="fbImp">
+          <h3>To improve</h3>
+          <p>Keep Dashers informed during delays. For example, let Marcus know when
+             you're contacting the customer to confirm the order. Also, remember to close
+             the workflow tool after completing the required steps, as missed in the
+             Renata chat.</p>
+        </div>
+
+        <h3 class="fbSub">Performance breakdown</h3>
+        <div class="fbTable">
+          <div class="fbRow">
+            <span class="fbSkill">Prioritization</span>
+            <span class="fbStars"><b>★</b><b>★</b><b>★</b><b>★</b><b>★</b></span>
+            <span class="fbNum">5</span>
+          </div>
+          <div class="fbRow">
+            <span class="fbSkill">Resolution speed</span>
+            <span class="fbStars"><b>★</b><b>★</b><b>★</b><b>★</b><i>★</i></span>
+            <span class="fbNum">4</span>
+          </div>
+          <div class="fbRow">
+            <span class="fbSkill">Customer management</span>
+            <span class="fbStars"><b>★</b><b>★</b><b>★</b><u>★</u><i>★</i></span>
+            <span class="fbNum">3.5</span>
+          </div>
+          <div class="fbRow">
+            <span class="fbSkill">Accuracy &amp; workflow adherence</span>
+            <span class="fbStars"><b>★</b><b>★</b><b>★</b><i>★</i><i>★</i></span>
+            <span class="fbNum">3</span>
+          </div>
+        </div>
+
+        <div class="fbBtns">
+          <button class="fbBtn pri" id="restartBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 11.5a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>
+          Restart scenario</button>
+          <!-- locked until this level is passed, so it reads as unavailable -->
+          <button class="fbBtn sec off" id="newBtn" disabled
+                  title="Pass this scenario to unlock the next one">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"/><path d="M12 8.2v7.6M8.2 12h7.6"/></svg>
+          New scenario</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1370,7 +1493,10 @@ function freshState(){
     stMenu: false,            // the Change status menu is showing
     stMenuHot: null,          // the option under the cursor
     stMenuPress: null,        // the option being clicked
-    done: false               // the scenario-complete card is up
+    done: false,              // the scenario-complete card is up
+    fbHot: false,             // cursor on View Feedback
+    fbPress: false,           // View Feedback is being clicked
+    feedback: false           // the scoring screen has replaced the card
   };
 }
 
@@ -1588,18 +1714,9 @@ at(103.6,"Workflow suggests telling the Dasher about the consumer call",st=>{
     msg:"I'll reach out to the customer to confirm that the order was dropped off. I'll keep you updated once I hear back.",
     pick:null, hover:null };
 });
-at(105.4,"Agent reaches for the copy control",st=>{ st.wf.copyPress=1; });
-at(106.2,"Copies the suggested message",st=>{ st.wf.copyPress=2; });
-at(107.2,"Pastes it into the chat box",st=>{
-  st.wf.copyPress=0;
-  st.draft="I'll reach out to the customer to confirm that the order was dropped off. I'll keep you updated once I hear back.";
-  st.composing=true;
-});
-at(109.2,"Sends it to the Dasher",st=>{
-  st.composing=false; st.draft="";
-  push(st,C1,{k:"out",t:109.2,text:"I'll reach out to the customer to confirm that the order was dropped off. I'll keep you updated once I hear back."});
-  preview(st,C1,"I'll reach out to the customer to confirm that the order…","Now");
-});
+/* The workflow puts the suggested heads-up on screen, but the agent never
+   copies or sends it — that miss is deliberate; it becomes a coaching point in
+   the feedback at the end of the session. The card just sits there unused. */
 
 /* --- the workflow sends the agent to the consumer --- */
 at(111.6,"Agent reaches for View order",st=>{ st.viewOrdPress=1; });
@@ -1637,7 +1754,8 @@ at(139.6,"Consumer confirms receipt",st=>{
   st.note="Consumer confirms the drop-off. The workflow can move on.";
 });
 at(149.5,"Call ends",st=>{
-  preview(st,C1,"I'll reach out to the customer to confirm that the order…","Now");
+  /* the queue row falls back to the last thing actually said in the thread */
+  preview(st,C1,"I did, but it didn't work.","Now");
   st.call={state:"ended",who:CAST.consumer.name,dialed:121.5,answered:127.5,ends:149.5,dur:22,
     transcript:"Consumer confirms the order was received at the door around 7:12 AM."};
   st.note=null;
@@ -1728,18 +1846,12 @@ at(190,"Clicks Continue",st=>{ st.wf.hover=null; st.wf.pick=true; });
    on its own, there is no separate close */
 at(191,"The workflow closes itself",st=>{ st.wf=null; });
 
+/* the Dasher's thanks is the last word in the thread — the agent does not
+   ask a wrap-up question, she goes straight to resolving the chat */
 at(192.6,"Dasher thanks the agent",st=>{
   push(st,C1,{k:"in",who:CAST.dasher.short,av:"M",avbg:"#8a6fc4",t:192.6,
     text:"Perfect, thank you so much!"});
-});
-
-agentSays(194.4,197.4,"Agent checks the issue is resolved",
-  "Did I resolve your issue today?",
-  st=>preview(st,C1,"Did I resolve your issue today?","Now"));
-
-at(199,"Dasher confirms",st=>{
-  push(st,C1,{k:"in",who:CAST.dasher.short,av:"M",avbg:"#8a6fc4",t:199,
-    text:"Yes, thank you!"});
+  preview(st,C1,"Perfect, thank you so much!","Now");
 });
 
 at(200.4,"Agent moves onto the Resolve pill",st=>{ st.quickHot="Resolve"; });
@@ -1999,12 +2111,8 @@ at(259.2,"Renata's chat is resolved and tagged",st=>{
   const c=chat(st,C2); c.resolved=true; c.tag="dasher_pay Low - DX";
   st.railBadge=0;
 });
-/* --- the workflow gets closed out first; the case status is the last thing
-       the agent touches, so the scenario ends on Solved --- */
-at(260.0,"Back to the workflow, agent moves onto Done",st=>{ st.wf.hover = true; });
-at(260.7,"Clicks Done",st=>{ st.wf.hover=null; st.wf.pick = true; });
-at(261.5,"The workflow closes",st=>{ st.wf = null; });
-
+/* --- the workflow stays open on its closing instructions; the agent works
+       the console alongside it and the scenario ends on Solved --- */
 at(262.3,"Agent moves onto the status pill",st=>{ st.stHot = true; });
 at(263.0,"Clicks Open",st=>{ st.stHot=false; st.stPress = true; });
 at(263.6,"The Change status menu drops down",st=>{
@@ -2022,6 +2130,11 @@ at(267.0,"Both contacts resolved",st=>{
 /* the simulator notices the last case went Solved and closes the scenario out */
 at(268.2,"The simulator marks the scenario complete",st=>{ st.done = true; });
 
+/* --- and the agent goes to read how she was scored --- */
+at(271.0,"Agent moves onto View Feedback",st=>{ st.fbHot = true; });
+at(272.0,"Clicks View Feedback",st=>{ st.fbHot=false; st.fbPress = true; });
+at(272.8,"The scoring screen opens",st=>{ st.fbPress=false; st.feedback = true; });
+
 /* ============================================================
    COVER
    The scenario selector is the opening of the clip, not a gate in front of it.
@@ -2034,8 +2147,9 @@ const CV_SCR1    = 3.2;   // Level 2 — Multitasking has settled into view
 const COVER_HOT  = 3.4;   // cursor reaches the Start Simulation button
 const COVER_TAP  = 4.7;   // the click
 
-/* the last 8s are the scenario-complete card sitting on screen to be read */
-const DEMO_LEN = 276.5;
+/* the tail is the scenario-complete card, then the scoring screen, both sitting
+   on screen long enough to be read */
+const DEMO_LEN = 289.0;
 const DURATION = +(COVER + DEMO_LEN).toFixed(1);
 
 /* Paints the cover for a given clip time. Off-screen once the click lands. */
@@ -2550,8 +2664,15 @@ function render(T){
   el("note").style.display = "none";
 
   /* the simulator's end card — up only once the last case has gone Solved,
-     and never while the scenario selector is still on screen */
-  el("doneWrap").classList.toggle("on", !!st.done && T >= COVER);
+     and never while the scenario selector is still on screen. It steps aside
+     the moment the scoring screen opens. */
+  const onCard = !!st.done && !st.feedback && T >= COVER;
+  el("doneWrap").classList.toggle("on", onCard);
+  el("fbWrap").classList.toggle("on", !!st.feedback && T >= COVER);
+
+  el("fbBtn").classList.toggle("hot", !!st.fbHot);
+  el("fbBtn").classList.toggle("press", !!st.fbPress);
+  el("fbCur").innerHTML = (st.fbHot || st.fbPress) ? CURSOR : "";
 
   el("label").textContent = T < COVER
     ? "Scenario selector — Level 2 selected"
@@ -3387,6 +3508,21 @@ el("gList").onclick = (e)=>{
   if(!Number.isFinite(i)) return;
   gPick = { gid:gNow.gid, auto:gNow.auto, i };
   render(t);
+};
+
+/* The end card and the scoring screen are real controls, not just painted
+   ones: clicking them scrubs the clip to the beat where that happens, so a
+   trainer can jump straight to the feedback instead of waiting for it. */
+const FB_OPEN = 272.8 + COVER;      // the beat the scoring screen is up
+function jump(to){
+  playing=false; Ring.reset(); Talk.reset(); el("play").textContent="▶"; setT(to);
+}
+el("fbBtn").onclick      = ()=> jump(FB_OPEN);
+el("backBtn").onclick    = ()=> jump(0);
+/* New scenario is locked, so it deliberately has no handler */
+el("restartBtn").onclick = ()=>{
+  Ring.unlock(); Talk.unlock();
+  setT(COVER); playing = true; last = 0; el("play").textContent = "❚❚";
 };
 
 /* expose for headless verification */
