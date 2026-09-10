@@ -2147,9 +2147,10 @@ const CV_SCR1    = 3.2;   // Level 2 — Multitasking has settled into view
 const COVER_HOT  = 3.4;   // cursor reaches the Start Simulation button
 const COVER_TAP  = 4.7;   // the click
 
-/* the tail is the scenario-complete card, then the scoring screen, both sitting
-   on screen long enough to be read */
-const DEMO_LEN = 289.0;
+/* the tail is the scenario-complete card, then the scoring screen. The clip ends
+   at 4:42 with the scoring screen up — it is the last thing on screen, and a
+   viewer who wants to read it can sit on the final frame */
+const DEMO_LEN = 276.4;
 const DURATION = +(COVER + DEMO_LEN).toFixed(1);
 
 /* Paints the cover for a given clip time. Off-screen once the click lands. */
