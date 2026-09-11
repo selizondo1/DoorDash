@@ -7,6 +7,8 @@
 <style>
 :root{
   --ink:#0f1111; --ink2:#3f4547; --ink3:#767c7f; --ink4:#9aa0a3;
+  /* --shell is the surface the console card floats on: the same black as the
+     left rail, so the rail reads as that surface running under the card */
   --line:#e3e6e7; --line2:#eff1f2; --bg:#ffffff; --shell:#000000;
   --mint:#d8f0eb; --mintline:#c3e6df;
   --green:#118a4e; --green2:#12b76a; --greenpill:#00a862;
@@ -24,15 +26,30 @@ button{font-family:inherit;cursor:pointer}
 .app{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;background:var(--shell);overflow:hidden}
 
 /* ---------- top ribbon ---------- */
-.ribbon{height:46px;flex:0 0 46px;background:#000;display:flex;align-items:center;padding:0 16px;gap:22px;color:#fff}
-.ribbon .brand{display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.5px;font-size:15px}
-.ribbon .logo{width:22px;height:22px;border-radius:5px;background:#fff;color:#000;display:grid;place-items:center;font-weight:800;font-size:12px}
-.ribbon .item{display:flex;align-items:center;gap:6px;font-size:13.5px;color:#f2f2f2;opacity:.95}
+/* white ribbon: the left rail stays black, so the top bar carries a hairline
+   underneath it to keep it separated from the app body. The mark is the
+   DoorDash dash, black square and white dash, no red up here. */
+.ribbon{height:46px;flex:0 0 46px;background:#fff;border-bottom:1px solid #e4e8e8;
+  display:flex;align-items:center;padding:0 16px;gap:11px;color:#0f1111}
+.ribbon .brand{display:flex;align-items:center;gap:7px;font-weight:800;letter-spacing:.2px;font-size:15px}
+.ribbon .logo{width:24px;height:24px;border-radius:6px;background:#0f1111;display:grid;place-items:center}
+/* the leaning hairlines that separate the menus */
+.ribbon .dv{width:1px;height:17px;background:#e0e4e5;transform:rotate(16deg);margin:0 3px}
+.ribbon .item{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:#2f3537}
 .ribbon .sp{flex:1}
-.ribbon .rt{display:flex;align-items:center;gap:14px}
-.avatarTop{width:26px;height:26px;border-radius:50%;background:#2f3f52;color:#fff;display:grid;place-items:center;font-size:10.5px;font-weight:700}
+.ribbon .rt{display:flex;align-items:center;gap:11px}
+.ribbon .hlp{width:22px;height:22px;border-radius:50%;border:1px solid #c9cfd0;
+  display:grid;place-items:center;font-size:11.5px;font-weight:700;color:#3f4547}
+.avatarTop{width:26px;height:26px;border-radius:50%;background:#dfe3e4;color:#3f4547;display:grid;place-items:center;font-size:10.5px;font-weight:700}
 
+/* the black surface the console floats on — the same black as the rail, so the
+   rail simply reads as the left edge of it */
 .body{flex:1;min-height:0;display:flex;background:#000;position:relative}
+
+/* the white console card: the three panes only. The rail stays outside it, flush
+   to the black, and the margins are the black gutter showing through */
+.deck{flex:1;min-width:0;display:flex;margin:10px 12px 12px 2px;
+  border-radius:14px;overflow:hidden;background:#fff}
 
 /* ---------- left rail ---------- */
 .rail{width:56px;flex:0 0 56px;background:#000;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:16px;color:#c9cccd}
@@ -273,7 +290,8 @@ button{font-family:inherit;cursor:pointer}
 /* the floating softphone widget */
 /* the popover is a navy shell; the header + channel strip float on it as
    one white card, exactly the way the console stacks them */
-.softPhone{position:absolute;right:20px;bottom:18px;width:306px;border-radius:11px;overflow:hidden;
+/* insets include the page gutter so it keeps its distance from the card edge */
+.softPhone{position:absolute;right:32px;bottom:30px;width:306px;border-radius:11px;overflow:hidden;
   box-shadow:0 16px 46px rgba(0,0,0,.32);z-index:70;background:#122534}
 .spCard{margin:5px 5px 0;background:#fff;border-radius:7px;overflow:hidden}
 .spHead{display:flex;align-items:flex-start;gap:11px;padding:9px 13px 10px}
@@ -494,7 +512,9 @@ button{font-family:inherit;cursor:pointer}
 .dPill.warn{background:#fdf2e3;color:#93590a}
 
 /* ---------- order details slide-over ---------- */
-.ordPanel{position:absolute;right:0;top:0;bottom:0;width:344px;background:#fff;border-left:1px solid var(--line);
+/* it sits over the console card, so its right corners follow the card's */
+.ordPanel{position:absolute;right:12px;top:10px;bottom:12px;width:344px;background:#fff;
+  border-left:1px solid var(--line);border-radius:0 14px 14px 0;
   box-shadow:-14px 0 34px rgba(0,0,0,.13);z-index:46;display:flex;flex-direction:column}
 .opHead{padding:16px 18px 10px;position:relative;flex:0 0 auto}
 .opHead .x{position:absolute;right:14px;top:14px;color:var(--ink3);font-size:15px}
@@ -1034,11 +1054,34 @@ button{font-family:inherit;cursor:pointer}
 <div class="wrap">
   <div class="app">
     <div class="ribbon">
-      <div class="brand"><span class="logo">D</span> OPS</div>
-      <div class="item">💬 Astra ⌄</div>
-      <div class="item">Apps ⌄</div>
+      <div class="brand">
+        <span class="logo">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff">
+            <path d="M3 9h11.6c2 0 3.6 1.35 3.6 3s-1.6 3-3.6 3H8l-2.8-2.7h9.4c.25 0 .45-.14.45-.3
+                     s-.2-.3-.45-.3H5.8z"/>
+          </svg>
+        </span> OPS
+      </div>
+      <span class="dv"></span>
+      <div class="item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3f4547"
+          stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.5 11.6c0 4-3.8 7.2-8.5 7.2a10 10 0 0 1-2.6-.35L4.5 20l1.2-3.2a6.9 6.9 0 0 1-2.2-5.2
+                   C3.5 7.6 7.3 4.4 12 4.4s8.5 3.2 8.5 7.2Z"/></svg>
+        Astra
+        <svg width="9" height="12" viewBox="0 0 10 14" fill="none" stroke="#8a9193"
+          stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 5.6 5 2.6l3 3M2 8.4l3 3 3-3"/></svg>
+      </div>
+      <span class="dv"></span>
+      <div class="item">
+        Apps
+        <svg width="9" height="12" viewBox="0 0 10 14" fill="none" stroke="#8a9193"
+          stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 5.6 5 2.6l3 3M2 8.4l3 3 3-3"/></svg>
+      </div>
       <div class="sp"></div>
-      <div class="rt"><span style="opacity:.8">?</span><span class="avatarTop">DW</span></div>
+      <div class="rt"><span class="hlp">?</span><span class="avatarTop">DW</span></div>
     </div>
 
     <div class="body" id="appBody">
@@ -1052,6 +1095,7 @@ button{font-family:inherit;cursor:pointer}
         <div class="ic" style="background:#2f3f52;color:#fff;border-radius:50%;width:28px;height:28px;font-size:11px;font-weight:700">D</div>
       </div>
 
+     <div class="deck">
       <!-- chat list -->
       <div class="pane chatlist">
         <div class="paneHead"><div class="ttl" id="listTitle">All (0)</div><div style="flex:1"></div><button class="iconbtn">«</button></div>
@@ -1124,6 +1168,7 @@ button{font-family:inherit;cursor:pointer}
         <!-- the workflow window floats over the context pane, not over the chat -->
         <div id="wfHost"></div>
       </div>
+     </div>
       <div id="ordHost"></div>
       <div id="phoneHost"></div>
     </div>
